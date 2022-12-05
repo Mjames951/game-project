@@ -13,6 +13,7 @@ player_lives = 3
 game_active = False
 score = 0
 first_game = True
+highscore = 5
 
 #BACKGROUND STUFF
 background_surf = pygame.Surface((800, 400))
@@ -24,6 +25,10 @@ start_surf = game_font.render('PRESS ANY KEY TO START', True, 'White')
 start_rect = start_surf.get_rect(midtop = (400, 200))
 lost_surf = game_font.render('YOU LOST', True, 'Red')
 lost_rect = lost_surf.get_rect(midtop = (400, 20))
+won_surf = game_font.render('YOU WON', True, 'Green')
+won_rect = won_surf.get_rect(midtop = (400, 20))
+highscore_surf = game_font.render(f'HIGH SCORE IS: {highscore}', True, 'White')
+highscore_rect = highscore_surf.get_rect(midtop = (400, 40))
 
 #CHARACTER STUFF
 movement_speed = 0
@@ -79,10 +84,14 @@ while True:
                 game_active = True
                 first_game = False
                 player_lives = 3
-                score = 0
 
                 mouth_rect.right = 100
                 food_speed = 8
+
+                if score > highscore:
+                    highscore = score
+
+                score = 0
 
     #putting in the background
     screen.blit(background_surf, (0,0))
@@ -106,8 +115,8 @@ while True:
             if movement_speed < 0:
                 movement_speed += movement_decceleration
                 mouth_rect.y += movement_speed
-        if mouth_rect.top < 0:
-            mouth_rect.top = 0
+        if mouth_rect.top < 30:
+            mouth_rect.top = 30
             movement_speed = 0
         if mouth_rect.bottom > 400:
             mouth_rect.bottom = 400
@@ -118,7 +127,7 @@ while True:
         if food_rect.colliderect(mouth_rect):
             score += 1
             food_rect.x = 800
-            food_rect.y = random.randint(10, 380)
+            food_rect.y = random.randint(40, 380)
             food_speedup_threshold -= 1
             if food_speedup_threshold == 0:
                 food_speed += food_speed_increment
@@ -142,10 +151,21 @@ while True:
     else:
         screen.blit(start_surf, start_rect)
         if first_game == False:
-            score_surf = game_font.render(f'YOU SCORED {score} POINTS', True, 'White')
-            score_rect = score_surf.get_rect(midbottom=(400, 380))
-            screen.blit(lost_surf, lost_rect)
+
+            highscore_surf = game_font.render(f'SCORE TO BEAT IS: {highscore}', True, 'White')
+            highscore_rect = highscore_surf.get_rect(midtop=(400, 70))
+            if score > highscore:
+                screen.blit(won_surf, won_rect)
+                score_surf = game_font.render(f'NEW HIGH SCORE IS {score} POINTS', True, 'White')
+                score_rect = score_surf.get_rect(midbottom=(400, 380))
+            else:
+                screen.blit(lost_surf, lost_rect)
+                screen.blit(highscore_surf, highscore_rect)
+                score_surf = game_font.render(f'YOU SCORED {score} POINTS', True, 'White')
+                score_rect = score_surf.get_rect(midbottom=(400, 380))
             screen.blit(score_surf, score_rect)
+        else:
+            screen.blit(highscore_surf, highscore_rect)
 
     pygame.display.update()
     clock.tick(30)
